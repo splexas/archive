@@ -18,7 +18,7 @@ int archive_add(archive_ctx_t *ctx, const char *file_path);
 // Writes the bytes of added files in the archive
 int archive_finalize(archive_ctx_t *ctx);
 
-// Reads the archive file from `file_path` and parses the information about the archive
+// Reads the archive file and parses the information about the archive
 int archive_read(archive_ctx_t *ctx);
 // Extracts the file from the archive by `file_index` to `file_path_out`
 int archive_extract(archive_ctx_t *ctx, int file_index, const char *file_path_out);
