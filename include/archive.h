@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 typedef struct {
+    const char *archive_file_path;
     FILE *stream;
     struct archive_list *files;
 } archive_ctx_t;
