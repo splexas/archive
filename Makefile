@@ -5,7 +5,7 @@ CLANGFORMAT = clang-format
 BUILD_DIR = build/
 OUTPUT = archive
 
-SRCFILES := main.c src/archive.c
+SRCFILES := main.c src/archive.c src/list.c
 OBJFILES := $(patsubst %.c,$(BUILD_DIR)%.o,$(SRCFILES))
 
 .PHONY: archive
