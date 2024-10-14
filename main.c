@@ -1,7 +1,4 @@
-#include <stdio.h>
 #include "include/archive.h"
+#include <stdio.h>
 
-int main(int argc, char *argv[])
-{
-    return 0;
-}
+int main(int argc, char *argv[]) { return 0; }
