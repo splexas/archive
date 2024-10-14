@@ -1,7 +1,7 @@
 #include <stdio.h>
+#include "include/archive.h"
 
-int main()
+int main(int argc, char *argv[])
 {
-    printf("yo\n");
     return 0;
 }
