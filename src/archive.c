@@ -28,7 +28,14 @@ int archive_create(archive_ctx_t *ctx)
 
     static const char MARK[] = "ARCHIVE";
     size_t written = fwrite((const void *)MARK, 1, sizeof(MARK) - 1, f);
-    return !(written == sizeof(MARK) - 1);
+
+    if (written != sizeof(MARK) - 1) {
+        fclose(f);
+        return 1;
+    }
+
+    ctx->stream = f;
+    return 0;
 }
 
 int archive_add(archive_ctx_t *ctx, const char *file_path) { return 0; }
