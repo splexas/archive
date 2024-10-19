@@ -14,8 +14,8 @@ archive_list_t *archive_list_init()
     return list;
 }
 
-int archive_list_add(archive_list_t *list, const char *file_name,
-                     unsigned int offset, size_t len)
+int archive_list_add(archive_list_t *list, const char *file_name, size_t offset,
+                     size_t len)
 {
     archive_list_node_t *new_node =
         (archive_list_node_t *)malloc(sizeof(archive_list_node_t));
@@ -27,9 +27,9 @@ int archive_list_add(archive_list_t *list, const char *file_name,
         free(new_node);
         return 1;
     }
-    
+
     new_node->next = NULL;
-    new_node->file_name = dup; 
+    new_node->file_name = dup;
     new_node->offset = offset;
     new_node->len = len;
 

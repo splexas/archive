@@ -1,8 +1,8 @@
 #include "../include/archive.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#define BUFFERING_SIZE 4096
 static const char MARK[] = "ARCHIVE";
 
 archive_ctx_t *archive_init(const char *archive_file_path)
@@ -43,17 +43,17 @@ int archive_create(archive_ctx_t *ctx)
 static const char *archive_get_file_name(const char *path, int *file_len_out)
 {
     int i = 0;
-    int last = 0;
+    int last = -1;
 
     while (path[i] != '\0') {
-        if (path[i] == '/')
+        if (path[i] == '/') {
             last = i;
-
+        }
         i++;
     }
 
-    *file_len_out = i - last - 1;
-    return last == 0 ? path : path + last + 1;
+    *file_len_out = (last == -1) ? i : i - last - 1;
+    return (last == -1) ? path : path + last + 1;
 }
 
 int archive_add(archive_ctx_t *ctx, const char *file_path)
@@ -67,14 +67,14 @@ int archive_add(archive_ctx_t *ctx, const char *file_path)
     size_t sz = ftell(f);
     fseek(f, 0, SEEK_SET);
 
-    size_t total_len = file_name_len + 1 + sizeof(size_t) * 2 + sz;
+    size_t total_len = (size_t)file_name_len + 1 + sizeof(size_t) * 2 + sz;
 
     if (fwrite(&total_len, 1, sizeof(size_t), ctx->stream) != sizeof(size_t)) {
         fclose(f);
         return 1;
     }
 
-    if (fwrite(file_name, 1, file_name_len + 1, ctx->stream) !=
+    if (fwrite(file_name, 1, (size_t)file_name_len + 1, ctx->stream) !=
         (size_t)file_name_len + 1) {
         fclose(f);
         return 1;
@@ -85,9 +85,15 @@ int archive_add(archive_ctx_t *ctx, const char *file_path)
         return 1;
     }
 
-    char c;
-    while ((c = fgetc(f)) != EOF)
-        fputc(c, ctx->stream);
+    char buf[BUFFERING_SIZE];
+    size_t bytes_read;
+
+    while ((bytes_read = fread(buf, 1, sizeof(buf), f)) > 0) {
+        if (fwrite(buf, 1, bytes_read, ctx->stream) != bytes_read) {
+            fclose(f);
+            return 1;
+        }
+    }
 
     fclose(f);
     return 0;
@@ -137,8 +143,7 @@ int archive_read(archive_ctx_t *ctx)
         }
         file_name[i] = 0;
 
-        int a = fread(&data_len, 1, sizeof(data_len), f);
-        if (a != sizeof(data_len)) {
+        if (fread(&data_len, 1, sizeof(data_len), f) != sizeof(data_len)) {
             fclose(f);
             return 1;
         }
@@ -155,10 +160,37 @@ int archive_read(archive_ctx_t *ctx)
     return 0;
 }
 
-int archive_extract(archive_ctx_t *ctx, int file_index,
+int archive_extract_by_offset(archive_ctx_t *ctx, size_t offset,
+                              const char *file_path_out)
+{
+    FILE *f = fopen(file_path_out, "wb");
+    if (!f)
+        return 1;
+
+    fseek(ctx->stream, offset, SEEK_SET);
+
+    char buf[BUFFERING_SIZE];
+    size_t bytes_read;
+
+    while ((bytes_read = fread(buf, 1, sizeof(buf), ctx->stream)) > 0) {
+        if (fwrite(buf, 1, bytes_read, f) != bytes_read) {
+            fclose(f);
+            return 1;
+        }
+    }
+
+    fclose(f);
+    return 0;
+}
+
+int archive_extract(archive_ctx_t *ctx, unsigned int file_index,
                     const char *file_path_out)
 {
-    return 0;
+    archive_list_node_t *node = archive_list_get(ctx->files, file_index);
+    if (!node)
+        return 1;
+
+    return archive_extract_by_offset(ctx, node->offset, file_path_out);
 }
 
 void archive_destroy(archive_ctx_t *ctx)

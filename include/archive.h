@@ -26,10 +26,11 @@ int archive_add(archive_ctx_t *ctx, const char *file_path);
 
 // Reads the archive file and parses the information about the archive
 int archive_read(archive_ctx_t *ctx);
+int archive_extract_by_offset(archive_ctx_t *ctx, size_t offset,
+                              const char *file_path_out);
 // Extracts the file from the archive by `file_index` to `file_path_out`
-int archive_extract(archive_ctx_t *ctx, int file_index,
+int archive_extract(archive_ctx_t *ctx, unsigned int file_index,
                     const char *file_path_out);
-
 /* Destroys the archive context, saves made changed to the file */
 void archive_destroy(archive_ctx_t *ctx);
 
