@@ -7,8 +7,15 @@
 typedef struct {
     const char *archive_file_path;
     FILE *stream;
-    struct archive_list *files;
+    archive_list_t *files;
 } archive_ctx_t;
+
+typedef struct {
+    size_t header_len;
+    char *file_name;
+    size_t file_len;
+
+} archive_file_header_t;
 
 archive_ctx_t *archive_init(const char *archive_file_path);
 
@@ -23,6 +30,7 @@ int archive_read(archive_ctx_t *ctx);
 int archive_extract(archive_ctx_t *ctx, int file_index,
                     const char *file_path_out);
 
+/* Destroys the archive context, saves made changed to the file */
 void archive_destroy(archive_ctx_t *ctx);
 
 #endif

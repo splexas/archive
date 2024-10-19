@@ -1,5 +1,6 @@
 #include "../include/list.h"
 #include <stdlib.h>
+#include <string.h>
 
 archive_list_t *archive_list_init()
 {
@@ -21,7 +22,7 @@ int archive_list_add(archive_list_t *list, const char *file_name,
         return 1;
 
     new_node->next = NULL;
-    new_node->file_name = file_name;
+    new_node->file_name = strdup(file_name);
     new_node->offset = offset;
     new_node->len = len;
 
@@ -50,6 +51,7 @@ void archive_list_destroy(archive_list_t *list)
     while (node->next) {
         prev = node;
         node = node->next;
+        free((void *)prev->file_name);
         free(prev);
     }
 
